@@ -55,3 +55,9 @@ tar: Error is not recoverable: exiting now
 [2026-01-02 12:37:19] Release directory already exists: release/
 [2026-01-02 12:37:20] Found 4 file(s) to package
 [2026-01-02 12:37:20] Successfully created archive: release/app-1.0.0-20260102_1237.tar.gz
+[2026-01-02 14:50:52] Version read from VERSION: 1.0.0
+[2026-01-02 14:50:52] Release directory already exists: release/
+[2026-01-02 14:50:52] Cleaning old build artifacts...
+[2026-01-02 14:50:52] Removed 3 old archive(s)
+[2026-01-02 14:50:53] Found 4 file(s) to package
+[2026-01-02 14:50:53] Successfully created archive: release/app-1.0.0-20260102_1450.tar.gz

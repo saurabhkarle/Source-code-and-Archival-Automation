@@ -75,3 +75,24 @@ jobs:
           echo "Starting build process..."
           ./build_package.sh
           echo "Build completed successfully!"
+      
+      # Step 6: Display build logs
+      - name: Display build logs
+        if: always()  # Run even if previous steps fail
+        run: |
+          echo "=== Build Log ==="
+          if [ -f build.log ]; then
+            cat build.log
+          else
+            echo "No build.log found"
+          fi
+      
+      # Step 7: Upload build artifacts
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: source-archives-${{ github.run_number }}
+          path: |
+            release/*.tar.gz
+            build.log
+          retention-days: 30

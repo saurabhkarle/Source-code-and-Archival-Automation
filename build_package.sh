@@ -82,6 +82,22 @@ package_source_files() {
     fi
 }
 
+clean_old_artifacts() {
+    log_message "Cleaning old build artifacts..."
+    
+    local old_count=0
+    if [[ -d "${RELEASE_DIR}" ]]; then
+        old_count=$(find "${RELEASE_DIR}" -name "app-*.tar.gz" | wc -l)
+        if [[ ${old_count} -gt 0 ]]; then
+            find "${RELEASE_DIR}" -name "app-*.tar.gz" -delete
+            log_message "Removed ${old_count} old archive(s)"
+        else
+            log_message "No old archives found to clean"
+        fi
+    fi
+}
+
 read_version
 create_release_directory
+clean_old_artifacts
 package_source_files

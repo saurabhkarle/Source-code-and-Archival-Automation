@@ -2,6 +2,9 @@
 VERSION_FILE="VERSION"
 LOG_FILE="build.log"
 RELEASE_DIR="release"
+FILE_EXTENSIONS=("*.sh" "*.js" "*.py")
+EXCLUDE_DIRS=(".git" "node_modules" "target" "build")
+
 
 
 log_message() {
@@ -42,5 +45,43 @@ create_release_directory() {
     fi
 }
 
+package_source_files() {
+    local timestamp=$(date '+%Y%m%d_%H%M')
+    local archive_name="app-${VERSION}-${timestamp}.tar.gz"
+    local archive_path="${RELEASE_DIR}/${archive_name}"
+    local temp_filelist=$(mktemp)
+    trap "rm -f ${temp_filelist}" EXIT
+    local file_count=0
+    for ext in "${FILE_EXTENSIONS[@]}"; do
+        while IFS= read -r -d '' file; do
+
+            local skip=false
+            for exclude_dir in "${EXCLUDE_DIRS[@]}"; do
+                if [[ "${file}" == *"/${exclude_dir}/"* ]] || [[ "${file}" == "./${exclude_dir}/"* ]]; then
+                    skip=true
+                    break
+                fi
+            done
+            
+            if [[ "${skip}" == false ]]; then
+                echo "${file}" >> "${temp_filelist}"
+                ((file_count++))
+            fi
+        done < <(find . -name "${ext}" -type f -print0)
+    done
+    if [[ ${file_count} -eq 0 ]]; then
+        log_error "No source files found to package"
+    fi
+    
+    log_message "Found ${file_count} file(s) to package"
+    
+    if tar -czf "${archive_path}" -T "${temp_filelist}" 2>> "${LOG_FILE}"; then
+        log_message "Successfully created archive: ${archive_path}"
+    else
+        log_error "Failed to create archive"
+    fi
+}
+
 read_version
 create_release_directory
+package_source_files

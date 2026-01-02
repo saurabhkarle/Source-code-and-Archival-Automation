@@ -6,18 +6,25 @@ FILE_EXTENSIONS=("*.sh" "*.js" "*.py")
 EXCLUDE_DIRS=(".git" "node_modules" "target" "build")
 
 
-
+# Log message with timestamp
 log_message() {
     local message="$1"
     local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
     echo "[${timestamp}] ${message}" | tee -a "${LOG_FILE}"
 }
 
-
+# Log error and exit
 log_error() {
     local message="$1"
     log_message "ERROR: ${message}"
     exit 1
+}
+
+# Initialize build process
+initialize_build() {
+    log_message "=== Starting Build Process ==="
+    log_message "Repository: $(basename "$(pwd)")"
+    log_message "Timestamp: $(date)"
 }
 
 
@@ -45,6 +52,7 @@ create_release_directory() {
     fi
 }
 
+# Build the main archive and add it to the release folder
 package_source_files() {
     local timestamp=$(date '+%Y%m%d_%H%M')
     local archive_name="app-${VERSION}-${timestamp}.tar.gz"
@@ -82,6 +90,7 @@ package_source_files() {
     fi
 }
 
+# Clear versions older than current version
 clean_old_artifacts() {
     log_message "Cleaning old build artifacts..."
     
@@ -97,7 +106,12 @@ clean_old_artifacts() {
     fi
 }
 
-read_version
-create_release_directory
-clean_old_artifacts
-package_source_files
+main() {
+    initialize_build
+    read_version
+    create_release_directory
+    clean_old_artifacts
+    package_source_files
+}
+
+main "$@"

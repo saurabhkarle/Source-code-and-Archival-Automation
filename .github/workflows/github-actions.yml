@@ -42,14 +42,18 @@ jobs:
           echo "Commit SHA: ${{ github.sha }}"
           echo "Runner OS: ${{ runner.os }}"
 
-      # Step 3: Run the build package script
+      # Step 3: Make build script executable
+      - name: Make build script executable
+        run: chmod +x build_package.sh
+
+      # Step 4: Run the build package script
       - name: Run build_package.sh
         run: |
           echo "Starting build process..."
           ./build_package.sh
           echo "Build completed successfully!"
       
-      # Step 4: Display build logs
+      # Step 5: Display build logs
       - name: Display build logs
         if: always()  # Run even if previous steps fail
         run: |
@@ -60,7 +64,7 @@ jobs:
             echo "No build.log found"
           fi
       
-      # Step 5: Upload build artifacts
+      # Step 6: Upload build artifacts
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:

@@ -1,10 +1,13 @@
 #!/bin/bash
+
+# Exit on pipe failure
+set -o pipefail
+
 VERSION_FILE="VERSION"
 LOG_FILE="build.log"
 RELEASE_DIR="release"
 FILE_EXTENSIONS=("*.sh" "*.js" "*.py")
 EXCLUDE_DIRS=(".git" "node_modules" "target" "build")
-
 
 # Log message with timestamp
 log_message() {

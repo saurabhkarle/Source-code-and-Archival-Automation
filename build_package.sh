@@ -5,15 +5,15 @@ set -o pipefail
 
 VERSION_FILE="VERSION"
 LOG_FILE="build.log"
-RELEASE_DIR="release"
+RELEASE_DIR="${1:-release}"  # First parameter, defaults to "release"
 FILE_EXTENSIONS=("*.sh" "*.js" "*.py")
-EXCLUDE_DIRS=(".git" "node_modules" "target" "build")
+EXCLUDE_DIRS=(".git") #included just the relevant and not ".node_modules" ".target" ".build" ".dist" "__pycache__" ".pytest_cache"
 
 # Log message with timestamp
 log_message() {
     local message="$1"
-    local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
-    echo "[${timestamp}] ${message}" | tee -a "${LOG_FILE}"
+    local timestamp=$(date '+%Y-%m-%d %H:%M')
+    echo "[${timestamp}] ${message}" | tee -a "${LOG_FILE}" >&2
 }
 
 # Log error and exit
@@ -59,7 +59,7 @@ create_release_directory() {
 package_source_files() {
     local timestamp=$(date '+%Y%m%d_%H%M')
     local archive_name="app-${VERSION}-${timestamp}.tar.gz"
-    local archive_path="${RELEASE_DIR}/${archive_name}"
+    local archive_path="./${archive_name}"  # Creates in the base folder
     local temp_filelist=$(mktemp)
     trap "rm -f ${temp_filelist}" EXIT
     local file_count=0
@@ -91,6 +91,38 @@ package_source_files() {
     else
         log_error "Failed to create archive"
     fi
+    echo "${archive_path}"
+}
+
+move_to_target() {
+    local archive_path="$1"
+    local archive_name=$(basename "${archive_path}")
+    if [[ ! -d "${RELEASE_DIR}" ]]; then
+        mkdir -p "${RELEASE_DIR}"
+        log_message "Created target directory: ${RELEASE_DIR}/"
+    else
+        log_message "Target directory exists: ${RELEASE_DIR}/"
+    fi
+    # Adding clean_old_artifacts() directly to target path
+    local old_count=0
+    if [[ -d "${RELEASE_DIR}" ]]; then
+        old_count=$(find "${RELEASE_DIR}" -name "app-*.tar.gz" 2>/dev/null | wc -l)
+        if [[ ${old_count} -gt 0 ]]; then
+            log_message "Found ${old_count} old archive(s) in target directory"
+            find "${RELEASE_DIR}" -name "app-*.tar.gz" -delete
+            log_message "Cleaned old archives from ${RELEASE_DIR}/"
+        fi
+    fi
+    log_message "Moving ${archive_name} to ${RELEASE_DIR}/"
+    if ! mv "${archive_path}" "${RELEASE_DIR}/${archive_name}"; then
+        log_error "Failed to move archive to ${RELEASE_DIR}/"
+    fi
+    if [[ ! -f "${RELEASE_DIR}/${archive_name}" ]]; then
+        log_error "Archive not found at destination after move"
+    else
+        log_message "Successfully moved archive to target directory"
+    fi
+    echo "${RELEASE_DIR}/${archive_name}"
 }
 
 # Clear versions older than current version
@@ -112,9 +144,12 @@ clean_old_artifacts() {
 main() {
     initialize_build
     read_version
-    create_release_directory
-    clean_old_artifacts
-    package_source_files
+    #create_release_directory
+    #clean_old_artifacts
+    local archive_path
+    archive_path=$(package_source_files)
+    local final_path
+    final_path=$(move_to_target "${archive_path}")
 }
 
 main "$@"

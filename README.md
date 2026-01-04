@@ -87,8 +87,8 @@ The github actions wrokflow will
 This release can also be triggered locally using release_package.sh
 
 ```bash
-echo "1.0.0" > VERSION
-git commit -am "Bump version to 1.0.0"
+echo "v1.0.0" > VERSION
+git commit -am "Bump version to v1.0.0"
 git tag v1.0.0
 git push origin v1.0.0
 ```

@@ -6,6 +6,7 @@ set -euo pipefail
 VERSION_FILE="VERSION"
 # GITHUB_ACCESS_TOKEN is defined in the environment file to be used here
 LOG_FILE="build.log"
+RELEASE_DIR="./artifacts"
 
 # Log message with timestamp
 log_message() {
@@ -41,9 +42,13 @@ fi
         
 log_message "Version read from ${VERSION_FILE}: ${VERSION}"
 
-# Extract version from tag as workflow does
-TAG_VERSION="${GITHUB_REF#refs/tags/v}"
-if [[ "${TAG_VERSION}" != "${VERSION}" ]]; then
+# Extract version from tag if this is a tag push
+if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+  TAG_VERSION="${GITHUB_REF#refs/tags/v}"
+else
+  TAG_VERSION=""
+# Only compare versions if this was a tag push
+if [[ -n "${TAG_VERSION}" && "${TAG_VERSION}" != "${VERSION}" ]]; then
   log_message "Warning: VERSION file (${VERSION}) does not match tag version (${TAG_VERSION})."
 fi
 

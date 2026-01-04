@@ -90,7 +90,7 @@ This release can also be triggered locally using release_package.sh
 echo "v1.0.0" > VERSION
 git commit -am "Bump version to v1.0.0"
 git tag v1.0.0
-git push origin v1.0.0
+./release_package.sh v1.0.0
 ```
 
 ### Viewing Workflow Runs

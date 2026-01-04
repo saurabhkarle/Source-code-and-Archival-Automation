@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Exit on pipe failure
-set -o pipefail
+set -eo pipefail
 
 MESSAGE="0"
 DRAFT="false"

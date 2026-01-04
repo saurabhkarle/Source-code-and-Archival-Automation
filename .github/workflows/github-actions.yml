@@ -89,7 +89,7 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/v')
-    
+
     steps:
       # Step 1:  Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Checkout code
@@ -104,15 +104,42 @@ jobs:
           name: source-archives-${{ github.run_number }}
           path: ./artifacts
 
-      # Step 3: Make build script executable
-      - name: Make build script executable
-        run: chmod +x release_package.sh
-
-      # Step 4: Run the release_package shell script to trigger github release
-      - name: Run release_package.sh
-        run:
-          ./release_package.sh
+      # Step 3: Extract version from tag
+      - name: Extract version
+        id: version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Detected version: $VERSION"
+      
+      # Step 4: Create GitHub Release
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: Source Code Archival Automation v${{ steps.version.outputs.version }}
+          body: |
+            ## Release v${{ steps.version.outputs.version }}
+            
+            Automated source code archive build from tag `${{ github.ref_name }}`.
+            
+            ### Changes
+            - Automated build via GitHub Actions
+            - Source code packaged into tar.gz archive
+            - All .sh, .js, and .py files included
+            - Build logs attached
+            
+            ### Artifacts
+            - Source archive (tar.gz)
+            - Build logs
+            
+            **Build Information:**
+            - Commit: ${{ github.sha }}
+            - Workflow: #${{ github.run_number }}
+            - Date: ${{ github.event.head_commit.timestamp }}
+          files: |
+            artifacts/release/*.tar.gz
+            artifacts/build.log
+          draft: false
+          prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_REPOSITORY: ${{ github.repository }}
-          GITHUB_REF: ${{ github.ref }}

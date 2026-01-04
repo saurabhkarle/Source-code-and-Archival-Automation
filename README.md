@@ -80,24 +80,17 @@ When you push a version tag:
 git tag -a v1.1.0 -m "Release version 1.1.0"
 git push origin v1.1.0
 ```
-The github actions wrokflow will 
+The github actions workflow will 
 1. Download build artifacts
-2. Create GitHub release with the version read from VERSION file
-
-This release can also be triggered locally using release_package.sh
-
-```bash
-echo "v1.0.0" > VERSION
-git commit -am "Bump version to v1.0.0"
-git tag v1.0.0
-./release_package.sh v1.0.0
-```
+2. Create GitHub release with the tagged version
+3. Will update the assets with the archived files
+4. Will have a default body with version updated
 
 ### Viewing Workflow Runs
 
 Access workflow runs at:
 - **GitHub UI**: Navigate to the Actions tab
-- **URL**: `https://github.com/saurabhkarle/Source-Code-Archival-Automation-Demonstration/actions` 
+- **URL**: `https://github.com/saurabhkarle/Source-code-and-Archival-Automation/actions` 
 
 ## License
 

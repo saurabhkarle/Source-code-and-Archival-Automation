@@ -47,6 +47,7 @@ if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
   TAG_VERSION="${GITHUB_REF#refs/tags/v}"
 else
   TAG_VERSION=""
+fi
 # Only compare versions if this was a tag push
 if [[ -n "${TAG_VERSION}" && "${TAG_VERSION}" != "${VERSION}" ]]; then
   log_message "Warning: VERSION file (${VERSION}) does not match tag version (${TAG_VERSION})."

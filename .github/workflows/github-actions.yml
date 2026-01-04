@@ -101,33 +101,11 @@ jobs:
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "Detected version: $VERSION"
 
-      - name: Create Release
-        uses: softprops/action-gh-release@v1
-        with:
-          name: Source Code Archival Automation v${{ steps.version.outputs.version }}
-          body: |
-            ## Release v${{ steps.version.outputs.version }}
-            
-            Automated source code archive build from tag `${{ github.ref_name }}`.
-            
-            ### Changes
-            - Automated build via GitHub Actions
-            - Source code packaged into tar.gz archive
-            - All .sh, .js, and .py files included
-            - Build logs attached
-            
-            ### Artifacts
-            - Source archive (tar.gz)
-            - Build logs
-            
-            **Build Information:**
-            - Commit: ${{ github.sha }}
-            - Workflow: #${{ github.run_number }}
-            - Date: ${{ github.event.head_commit.timestamp }}
-          files: |
-            artifacts/release/*.tar.gz
-            artifacts/build.log
-          draft: false
-          prerelease: false
+      - name: Run release_package.sh
+        run: |
+          chmod +x release_package.sh
+          ./release_package.sh
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_REF: ${{ github.ref }}

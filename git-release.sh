@@ -1,12 +1,28 @@
 #!/bin/bash
 
+# Exit on pipe failure
+set -o pipefail
+
 MESSAGE="0"
-VERSION="1.0.1"
 DRAFT="false"
 PRE="false"
 BRANCH="master"
-
+VERSION_FILE="VERSION"
 # GITHUB_ACCESS_TOKEN is defined in the environment file to be used here
+
+read_version() {
+    if [[ ! -f "${VERSION_FILE}" ]]; then
+        log_error "VERSION file not found. Please create a VERSION file in the repository root."
+    fi
+        
+    VERSION=$(cat "${VERSION_FILE}" | tr -d '[:space:]')
+        
+    if [[ -z "${VERSION}" ]]; then
+        log_error "VERSION file is empty. Please add a version number (e.g., 1.0.0)."
+    fi
+        
+    log_message "Version read from ${VERSION_FILE}: ${VERSION}"
+}
 
 # get repon name and owner
 REPO_REMOTE=$(git config --get remote.origin.url)
@@ -18,23 +34,6 @@ fi
 
 REPO_NAME=$(basename -s .git $REPO_REMOTE)
 REPO_OWNER=$(git config --get user.name)
-
-# get args
-while getopts v:m:b:draft:pre: option
-do
-	case "${option}"
-		in
-		v) VERSION="$OPTARG";;
-		m) MESSAGE="$OPTARG";;
-		b) BRANCH="$OPTARG";;
-		draft) DRAFT="true";;
-		pre) PRE="true";;
-	esac
-done
-if [ $VERSION == "0" ]; then
-	echo "Usage: git-release -v <version> [-b <branch>] [-m <message>] [-draft] [-pre]"
-	exit 1
-fi
 
 # set default message
 if [ "$MESSAGE" == "0" ]; then

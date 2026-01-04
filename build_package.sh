@@ -1,5 +1,13 @@
 #!/bin/bash
 
+# Requirements:
+#   - bash 4.0 or higher
+#   - tar utility
+#   - A VERSION file in the repository root
+
+# Usage:
+#   ./build_package.sh [target_directory]
+
 # Exit on pipe failure
 set -o pipefail
 
@@ -23,6 +31,19 @@ log_error() {
     exit 1
 }
 
+# Displays build summary
+display_summary() {
+    local archive_path="$1"
+    log_message "=== Build Summary ==="
+    log_message "Status: SUCCESS"
+    log_message "Version: ${VERSION}"
+    log_message "Archive: $(basename "${archive_path}")"
+    log_message "Location: ${archive_path}"
+    log_message "Target directory: ${TARGET_DIR}"
+    log_message "Log file: ${LOG_FILE}"
+    log_message "=== Build Complete ==="
+}
+
 # Initialize build process
 initialize_build() {
     log_message "=== Starting Build Process ==="
@@ -30,7 +51,7 @@ initialize_build() {
     log_message "Timestamp: $(date)"
 }
 
-
+# Reads the version from the VERSION file to add to archive name
 read_version() {
     if [[ ! -f "${VERSION_FILE}" ]]; then
         log_error "VERSION file not found. Please create a VERSION file in the repository root."
@@ -45,17 +66,7 @@ read_version() {
     log_message "Version read from ${VERSION_FILE}: ${VERSION}"
 }
 
-
-create_release_directory() {
-    if [[ ! -d "${RELEASE_DIR}" ]]; then
-        mkdir -p "${RELEASE_DIR}"
-        log_message "Created release directory: ${RELEASE_DIR}/"
-    else
-        log_message "Release directory already exists: ${RELEASE_DIR}/"
-    fi
-}
-
-# Build the main archive and add it to the release folder
+# Builds the main archive and adds it to the release folder
 package_source_files() {
     local timestamp=$(date '+%Y%m%d_%H%M')
     local archive_name="app-${VERSION}-${timestamp}.tar.gz"
@@ -94,25 +105,14 @@ package_source_files() {
     echo "${archive_path}"
 }
 
+# Moves archived files to release folder
 move_to_target() {
     local archive_path="$1"
     local archive_name=$(basename "${archive_path}")
-    if [[ ! -d "${RELEASE_DIR}" ]]; then
-        mkdir -p "${RELEASE_DIR}"
-        log_message "Created target directory: ${RELEASE_DIR}/"
-    else
-        log_message "Target directory exists: ${RELEASE_DIR}/"
-    fi
+     # Adding create_release_directory() to create the release folder in base repo directly if not found
+    create_release_directory
     # Adding clean_old_artifacts() directly to target path
-    local old_count=0
-    if [[ -d "${RELEASE_DIR}" ]]; then
-        old_count=$(find "${RELEASE_DIR}" -name "app-*.tar.gz" 2>/dev/null | wc -l)
-        if [[ ${old_count} -gt 0 ]]; then
-            log_message "Found ${old_count} old archive(s) in target directory"
-            find "${RELEASE_DIR}" -name "app-*.tar.gz" -delete
-            log_message "Cleaned old archives from ${RELEASE_DIR}/"
-        fi
-    fi
+    clean_old_artifacts
     log_message "Moving ${archive_name} to ${RELEASE_DIR}/"
     if ! mv "${archive_path}" "${RELEASE_DIR}/${archive_name}"; then
         log_error "Failed to move archive to ${RELEASE_DIR}/"
@@ -123,6 +123,16 @@ move_to_target() {
         log_message "Successfully moved archive to target directory"
     fi
     echo "${RELEASE_DIR}/${archive_name}"
+}
+
+# Creates a directory of release folder if folder not found
+create_release_directory() {
+    if [[ ! -d "${RELEASE_DIR}" ]]; then
+        mkdir -p "${RELEASE_DIR}"
+        log_message "Created release directory: ${RELEASE_DIR}/"
+    else
+        log_message "Release directory already exists: ${RELEASE_DIR}/"
+    fi
 }
 
 # Clear versions older than current version
@@ -144,12 +154,11 @@ clean_old_artifacts() {
 main() {
     initialize_build
     read_version
-    #create_release_directory
-    #clean_old_artifacts
     local archive_path
     archive_path=$(package_source_files)
     local final_path
     final_path=$(move_to_target "${archive_path}")
+    display_summary "${final_path}"
 }
 
 main "$@"

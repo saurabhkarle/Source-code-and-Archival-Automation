@@ -8,8 +8,8 @@
 # Usage:
 #   ./build_package.sh [target_directory]
 
-# Exit on pipe failure
-set -o pipefail
+# Exit on error, undefined variables, and pipeline failure
+set -euo pipefail
 
 VERSION_FILE="VERSION"
 LOG_FILE="build.log"

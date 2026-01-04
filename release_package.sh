@@ -29,19 +29,17 @@ if [[ -z "${GITHUB_REPOSITORY:-}" ]]; then
   log_error "GITHUB_REPOSITORY must be set (e.g. owner/repo)."
 fi
 
-read_version() {
-    if [[ ! -f "${VERSION_FILE}" ]]; then
-        log_error "VERSION file not found. Please create a VERSION file in the repository root."
-    fi
+if [[ ! -f "${VERSION_FILE}" ]]; then
+    log_error "VERSION file not found. Please create a VERSION file in the repository root."
+fi
         
-    VERSION=$(cat "${VERSION_FILE}" | tr -d '[:space:]')
+VERSION=$(cat "${VERSION_FILE}" | tr -d '[:space:]')
         
-    if [[ -z "${VERSION}" ]]; then
-        log_error "VERSION file is empty. Please add a version number (e.g., 1.0.0)."
-    fi
+if [[ -z "${VERSION}" ]]; then
+    log_error "VERSION file is empty. Please add a version number (e.g., 1.0.0)."
+fi
         
-    log_message "Version read from ${VERSION_FILE}: ${VERSION}"
-}
+log_message "Version read from ${VERSION_FILE}: ${VERSION}"
 
 # Extract version from tag as workflow does
 TAG_VERSION="${GITHUB_REF#refs/tags/v}"

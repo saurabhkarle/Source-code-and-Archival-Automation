@@ -39,7 +39,7 @@ display_summary() {
     log_message "Version: ${VERSION}"
     log_message "Archive: $(basename "${archive_path}")"
     log_message "Location: ${archive_path}"
-    log_message "Target directory: ${TARGET_DIR}"
+    log_message "Target directory: ${RELEASE_DIR}"
     log_message "Log file: ${LOG_FILE}"
     log_message "=== Build Complete ==="
 }

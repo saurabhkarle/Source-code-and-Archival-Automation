@@ -49,16 +49,16 @@ if [[ "${TAG_VERSION}" != "${VERSION}" ]]; then
   log_message "Warning: VERSION file (${VERSION}) does not match tag version (${TAG_VERSION})."
 fi
 
-TAG_NAME="${GITHUB_REF_NAME:-v${TAG_VERSION}}"
+TAG_NAME="${GITHUB_REF_NAME:-v${VERSION}}"
 
 
 # Adding proper body and information for the release
-RELEASE_NAME="Source Code Archival Automation v${TAG_VERSION}"
+RELEASE_NAME="Source Code Archival Automation v${VERSION}"
 
 BUILD_DATE="${GITHUB_EVENT_TIMESTAMP:-$(date --iso-8601=seconds)}"
 
 read -r -d '' RELEASE_BODY <<EOF || true
-## Release v${TAG_VERSION}
+## Release v${VERSION}
 
 Automated source code archive build from tag \`${TAG_NAME}\`.
 
